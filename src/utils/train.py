@@ -1,6 +1,6 @@
 import torch
 from tqdm import tqdm
-def train(model,optimizer,epochs,criterion,trainloader,device):
+def train_model(model,optimizer,epochs,criterion,trainloader,device):
     """
 
     Args:
@@ -32,3 +32,5 @@ def train(model,optimizer,epochs,criterion,trainloader,device):
         epoch_loss = running_loss / len(trainloader)
         epoch_acc =  running_correct.double() / len(trainloader)
         print(f'Train: Epoch{epoch}  Loss:{epoch_loss} ,  Accuracy{epoch_acc}')
+
+    return model
