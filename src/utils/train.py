@@ -1,6 +1,6 @@
 import torch
 from tqdm import tqdm
-def train_model(model,optimizer,epochs,criterion,trainloader,validation_loader=None,device='cuda'):
+def train_model(model,optimizer,epochs,criterion,trainloader,validation_loader=None,device='cuda',checkpoint=None):
     """
 
     Args:
@@ -8,10 +8,16 @@ def train_model(model,optimizer,epochs,criterion,trainloader,validation_loader=N
         optimizer(nn.optim):
         criterion(nn.CrossEntropy)
         trainloader(torch.utils.data.Dataloader):
-        device(torch.device): 
+        validation_loader(torch.utils.data.Dataloader):
+        device(torch.device):
+        checkpoint(str): 
     """ 
-    
-    
+    if checkpoint is not None:
+        state_dict = torch.load(checkpoint)
+        model.load_state_dict(state_dict)
+        print('Starting training from checkpoint')
+        #check how to load optimizer in checkpoint
+        #Implement that later
     for epoch in tqdm(range(epochs)):
         
         model.train()
@@ -35,10 +41,10 @@ def train_model(model,optimizer,epochs,criterion,trainloader,validation_loader=N
             total += labels.size(0)
             correct += (preds == labels).sum().item()
 
-        print(f'Train Accuracy:{100 * correct / total}')
-        epoch_loss = running_loss / len(trainloader)
+        epoch_loss = running_loss / total
         epoch_acc =  running_correct.double() / len(trainloader)
-        print(f'Train: Epoch{epoch}  Loss:{epoch_loss} ,  Accuracy{epoch_acc}')
+        print(f'Train: Epoch{epoch}  Loss:{running_loss / total} Accuracy:{100 * correct / total }')
+
         
         """
         model.eval()

@@ -24,7 +24,7 @@ if __name__ ==  '__main__':
         train_set_csv,\
         transform=train_set_transform)
     
-    train_loader = DataLoader(train_dataset,batch_size=32,shuffle=True)
+    train_loader = DataLoader(train_dataset,batch_size=32,shuffle=True,pin_memory=True,num_workers=4)
     
     
     test_set_transform = transforms.Compose([transforms.ToPILImage(),\
@@ -41,8 +41,6 @@ if __name__ ==  '__main__':
     
     model = ClassifierNet(NUM_CLASSES)
     model = model.to(device)
-    for parameter in model.backbone.parameters():
-        parameter.requires_grad = False
     
     optim = torch.optim.Adagrad(model.parameters(),lr=0.01)
 
