@@ -6,6 +6,8 @@ __pycache__/
 # VS code extensions
 .vscode/
 
+# .pth extensions
+*.pth
 
 # C extensions
 *.so
