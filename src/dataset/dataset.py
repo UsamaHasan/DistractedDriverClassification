@@ -37,7 +37,8 @@ class CustomDataset(Dataset):
         img_path = os.path.join(img_folder,img_name)
         img_path = os.path.join(self.folder_path,img_path)
         img = io.imread(img_path)
-        label = self.dataset_file.iloc[idx,1]        
+        label = self.dataset_file.iloc[idx,1]    
+            
         if self.transform:
             img = self.transform(img)
         return img,label

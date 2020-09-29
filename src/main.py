@@ -1,6 +1,7 @@
 from dataset.dataset import CustomDataset 
 from models.net import ClassifierNet
 from utils.train import train_model
+from utils.config import *
 import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -12,21 +13,34 @@ NO_EPOCHS = 20
 if __name__ ==  '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
  
-    transform = transforms.Compose([transforms.ToPILImage(),\
+    train_set_transform = transforms.Compose([transforms.ToPILImage(),\
         transforms.Resize((224,224)),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize([0.4601,0.4601,0.4601],[0.2701,0.2701,0.2701])
         ])
-    dataset = CustomDataset('/home/ncai/Dataset/Distracted driver dataset/v1_cam1_no_split',\
-        '/home/ncai/Dataset/Distracted driver dataset/v1_cam1_no_split/Train_data_list.csv',\
-        transform=transform)
     
-    train_loader = DataLoader(dataset,batch_size=32,shuffle=True)
+    train_dataset = CustomDataset(dataset_root_folder,\
+        train_set_csv,\
+        transform=train_set_transform)
+    
+    train_loader = DataLoader(train_dataset,batch_size=32,shuffle=True)
+    
+    test_set_transform = transforms.Compose([transforms.ToPILImage(),\
+        transforms.Resize((244,244)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.4601,0.4601,0.4601],[0.2701,0.2701,0.2701])        
+    ])
+    
+    test_dataset = CustomDataset(dataset_root_folder , \
+        test_set_csv, transform = test_set_transform)
+    
+    test_loader = DataLoader(test_dataset , batch_size=32 , shuffle=True)
+
     model = ClassifierNet(NUM_CLASSES)
     model = model.to(device)
-    optim = torch.optim.Adagrad(model.parameters(),lr=0.001,weight_decay=1e-5)
+    optim = torch.optim.Adagrad(model.parameters(),lr=0.001)
     criterion = torch.nn.CrossEntropyLoss()
     
-    trained_model = train_model(model,optim,NO_EPOCHS,criterion,train_loader,device)
-    torch.save(trained_model,'model.pth')
+    trained_model = train_model(model,optim,NO_EPOCHS,criterion,train_loader,test_loader,device)
+    torch.save(trained_model,'model_final.pth')

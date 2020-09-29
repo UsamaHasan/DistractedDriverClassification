@@ -1,6 +1,6 @@
 import torch
 from tqdm import tqdm
-def train_model(model,optimizer,epochs,criterion,trainloader,device):
+def train_model(model,optimizer,epochs,criterion,trainloader,validation_loader,device):
     """
 
     Args:
@@ -10,9 +10,11 @@ def train_model(model,optimizer,epochs,criterion,trainloader,device):
         trainloader(torch.utils.data.Dataloader):
         device(torch.device): 
     """ 
-    model.train()
+    
     
     for epoch in tqdm(range(epochs)):
+        
+        model.train()
         running_loss = 0.0
         running_correct = 0
         
@@ -32,5 +34,22 @@ def train_model(model,optimizer,epochs,criterion,trainloader,device):
         epoch_loss = running_loss / len(trainloader)
         epoch_acc =  running_correct.double() / len(trainloader)
         print(f'Train: Epoch{epoch}  Loss:{epoch_loss} ,  Accuracy{epoch_acc}')
+
+        model.eval()
+        eval_loss = 0.0
+        eval_correct = 0
+        for idx , mini_batches in enumerate(validation_loader):
+            imgs , labels = mini_batches
+            imgs = imgs.to(device)
+            labels = labels.to(device).long()
+            output = model(imgs)
+            _ , preds = torch.max(output,1)
+            loss = criterion(output,labels)
+            eval_loss+= loss.item()
+            eval_correct += torch.sum(preds == labels.data)
+        print(f'Eval Loss:{eval_loss/len(validation_loader)}, Eval_Accuracy{eval_correct.double()/len(validation_loader)}')
+    
+        if(epoch%5==0):
+            torch.save(model,f'model{epoch}.pth')
 
     return model
