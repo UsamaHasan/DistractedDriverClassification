@@ -22,7 +22,6 @@ def train_model(model,optimizer,epochs,criterion,trainloader,validation_loader=N
         
         model.train()
         running_loss = 0.0
-        running_correct = 0
         total = 0
         correct = 0.0
         for idx , mini_batch in tqdm(enumerate(trainloader)):
@@ -37,30 +36,29 @@ def train_model(model,optimizer,epochs,criterion,trainloader,validation_loader=N
             loss.backward()
             optimizer.step()
             running_loss +=loss.item()
-            running_correct += torch.sum(preds == labels.data)
             total += labels.size(0)
             correct += (preds == labels).sum().item()
 
-        epoch_loss = running_loss / total
-        epoch_acc =  running_correct.double() / len(trainloader)
-        print(f'Train: Epoch{epoch}  Loss:{running_loss / total} Accuracy:{100 * correct / total }')
+        print(f'Train: Epoch:{epoch}  Loss:{running_loss / total} Accuracy:{100 * correct / total }')
 
-        
-        """
         model.eval()
         eval_loss = 0.0
-        eval_correct = 0
-        for idx , mini_batches in enumerate(validation_loader):
+        eval_correct = 0.0
+        total = 0
+        correct = 0.0
+        for idx , mini_batches in tqdm(enumerate(validation_loader)):
             imgs , labels = mini_batches
             imgs = imgs.to(device)
             labels = labels.to(device).long()
             output = model(imgs)
             _ , preds = torch.max(output,1)
             loss = criterion(output,labels)
-            eval_loss+= loss.item()
-            eval_correct += torch.sum(preds == labels.data)
-        print(f'Eval Loss:{eval_loss/len(validation_loader)}, Eval_Accuracy{eval_correct.double()/len(validation_loader)}')
-        """
+            eval_loss += loss.item()
+            correct += (preds == labels).sum().item()
+            total += labels.size(0)
+            
+        print(f'Test: Epoch:{epoch}  Loss:{eval_loss / total}, Eval_Accuracy{100* correct/ total}')
+        
         if(epoch%5==0):
             torch.save(model.state_dict(),f'model{epoch}.pth')
 
